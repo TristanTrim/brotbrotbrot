@@ -71,6 +71,7 @@
   drawIteration = function() {
     var i, inSet, j, ref, ref1, zx, zx2, zy, zy2;
     ctx.strokeStyle = "green";
+    ctx.fillStyle = "green";
     ctx.lineWidth = 0.5;
     zx = 0;
     zy = 0;
@@ -84,13 +85,24 @@
       ctx.stroke();
       ctx.beginPath();
       ctx.arc(fromWorldX(zx), fromWorldY(zy), 2, 0, 2 * Math.PI, false);
-      ctx.fillStyle = "green";
       ctx.fill();
       if (Math.sqrt(zx * zx + zy * zy) > 400.0 ) {
         inSet = false;
         break;
       }
     }
+    // add cursor and conv dot
+    ctx.fillStyle = "orange";
+    ctx.beginPath();
+    ctx.arc(fromWorldX(zx), fromWorldY(zy), 2, 0, 2 * Math.PI, false);
+    ctx.fill();
+    zx = 0;
+    zy = 0;
+    ref = [zx, zy], zx2 = ref[0], zy2 = ref[1];
+    ref1 = f(cx, cy, zx, zy), zx = ref1[0], zy = ref1[1];
+    ctx.arc(fromWorldX(zx), fromWorldY(zy), 2, 0, 2 * Math.PI, false);
+    ctx.fill();
+
     if (inSet) {
       return set.push([cx, cy]);
     }
@@ -210,8 +222,9 @@
 
   canvas.onmousemove = (function(_this) {
     return function(event) {
-      cxmeta = toWorldX(event.clientX);
-      cymeta = toWorldY(event.clientY);
+      cxmeta = toWorldX(event.clientX + scrollX -3);
+      cymeta = toWorldY(event.clientY + scrollY -5 -30);// if you change 30
+                                    // you also need to change css
       if (panning) {
         centerX += (panx - cxmeta);
         centerY += (pany - cymeta);
