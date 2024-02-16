@@ -167,7 +167,7 @@
     return(0);
   };
   window.newtcolor = function(x, y) {
-    colors = [30,60,90];
+    colors = [10,30,50];
     var i, j, q, ref2, tx, ty, zx, zy;
     var ref, ref1;
     zx = 0;
