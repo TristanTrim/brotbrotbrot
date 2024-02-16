@@ -20,11 +20,25 @@
 
   panning = false;
 
-  f = function(cx, cy, zx, zy) {
+  window.setbrot = function(){
+    window.f = window.brotfn;
+    window.color = window.brotcolor;
+    window.updateCanvas = true;
+    window.updateBg = true;
+  };
+
+  window.setnewt = function(){
+    window.f = window.newtonfn;
+    window.color = window.newtcolor;
+    window.updateCanvas = true;
+    window.updateBg = true;
+  };
+
+  window.brotfn = function(cx, cy, zx, zy) {
     return [zx * zx - zy * zy + cx, 2 * zx * zy + cy];
   };
 
-  window.newton = function(cx,cy,zx,zy) {
+  window.newtonfn = function(cx,cy,zx,zy) {
     if(zx==0){
         zx=cx; zy=cy;
         return([zx,zy]);
@@ -36,7 +50,7 @@
         ];
   };
 
-  window.f = newton;
+  window.f = window.brotfn;
 
   square = function(zx, zy) {
     return [zx * zx - zy * zy, 2 * zx * zy];
@@ -122,7 +136,7 @@
     }
   };
 
-  color = function(x, y) {
+  window.brotcolor = function(x, y) {
     var i, j, q, ref2, tx, ty, zx, zy;
     var ref, ref1;
     zx = 0;
@@ -136,8 +150,7 @@
     if (q * (q + (x - 0.25)) < 0.25 * y * y) {
       return 0;
     }
-    //for (i = j = 0, ref2 = scale / 4; 0 <= ref2 ? j <= ref2 : j >= ref2; i = 0 <= ref2 ? ++j : --j) {
-    for (i=0;i<30;i++){
+    for (i = j = 0, ref2 = scale / 4; 0 <= ref2 ? j <= ref2 : j >= ref2; i = 0 <= ref2 ? ++j : --j) {
 
       ref = [zx, zy], zx2 = ref[0], zy2 = ref[1];
       ref1 = window.f(x, y, zx, zy), zx = ref1[0], zy = ref1[1];
@@ -146,54 +159,71 @@
       //zx = tx - ty + x;
       tx = zx * zx;
       ty = zy * zy;
+      if (tx + ty > 4) {
+        return 255.0 * i / 50;
+      }
+    }
+        // default black
+    return(0);
+  };
+  window.newtcolor = function(x, y) {
+    colors = [30,60,90];
+    var i, j, q, ref2, tx, ty, zx, zy;
+    var ref, ref1;
+    zx = 0;
+    zy = 0;
+    zx2= 0;
+    zy2= 0;
+    tx = 0;
+    ty = 0;
+   distsum=0;
+
+    for (i=0;i<30;i++){
+
+      ref = [zx, zy], zx2 = ref[0], zy2 = ref[1];
+      ref1 = window.f(x, y, zx, zy), zx = ref1[0], zy = ref1[1];
+
+      tx = zx * zx;
+      ty = zy * zy;
       tx2 = zx2 * zx2;
       ty2 = zy2 * zy2;
       tdist = tx*tx+ty*ty;
-      distsum = distsum + tdist;
 
-        // time to travel distance
+        // time to travel distance // it's pretty but not crisp.
+     // distsum = distsum + tdist;
      // if (distsum > 10){
      //    return 255.0 * (i+1) / 20;
      // }
 
-        // this is obviously no longer general to mandel.
-        // I need the whole color system to belong
-        // to the set function.
+        // color by tridrant after 30 iterations
+        // or converge to 1e-5
       if (tdist < 1e-5){
         if (zx <2*zy){
             if (zy<0){
-              return(80.0);
+              return(colors[0]);
             }else{
-              return(160.0);
+              return(colors[1]);
             }
         }else{
-            return(240.0);
+            return(colors[2]);
         }
       }
-
-      //if (tx + ty > 40 || isNaN(tx) || isNaN(ty)) {
-      //if (tdist<1e-150){
-      
-     // if (tdist<1e-3){
-     //   return 127 * i / 10;
-     // }
-     // if (tx + ty > 1e3 || isNaN(tx) || isNaN(ty)) {
-     //   return 127 + 128.0 * (10-i) / 10;
-     // }
     }
-        // default black
-    //return(0);
-        // default color split by x pos or x<0 y pos/neg
-        if (zx <0){
-            if (zy<0){
-              return(80.0);
-            }else{
-              return(160.0);
-            }
+
+
+    // default color split by x pos or x<0 y pos/neg
+    if (zx <0){
+        if (zy<0){
+          return(colors[0]);
         }else{
-            return(240.0);
+          return(colors[1]);
         }
+    }else{
+        return(colors[2]);
+    }
   };
+
+  window.color = brotcolor;
 
   render = function() {
     var c, j, k, offset, ref, ref1, x, xx, y, yy;
@@ -202,7 +232,7 @@
       for (x = k = 0, ref1 = bgcanvas.width - 1; 0 <= ref1 ? k <= ref1 : k >= ref1; x = 0 <= ref1 ? ++k : --k) {
         xx = toWorldX(x);
         yy = toWorldY(y);
-        c = color(xx, yy);
+        c = window.color(xx, yy);
         data.data[offset++] = c;
         data.data[offset++] = c;
         data.data[offset++] = c;
@@ -277,7 +307,6 @@
 
   bgctx = bgcanvas.getContext("2d");
 
-  data = bgctx.getImageData(0, 0, bgcanvas.width, bgcanvas.height);
 
   window.requestAnimationFrame = (ref = (ref1 = (ref2 = window.requestAnimationFrame) != null ? ref2 : window.webkitRequestAnimationFrame) != null ? ref1 : window.mozRequestAnimationFrame) != null ? ref : window.msRequestAnimationFrame;
 
@@ -288,7 +317,7 @@
   canvas.onmousemove = (function(_this) {
     return function(event) {
       cxmeta = toWorldX(event.clientX + scrollX -3);
-      cymeta = toWorldY(event.clientY + scrollY -5 -30);// if you change 30
+      cymeta = toWorldY(event.clientY + scrollY -5 -0);// if you change 30
                                     // you also need to change css
       if (panning) {
         centerX += (panx - cxmeta);
@@ -342,6 +371,19 @@
       }
     };
   })(this);
+
+  function resizeCanvas() {
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    bgcanvas.width = window.innerWidth;
+    bgcanvas.height = window.innerHeight;
+
+  }
+
+  resizeCanvas();
+  data = bgctx.getImageData(0, 0, bgcanvas.width, bgcanvas.height);
 
   drawLoop();
 

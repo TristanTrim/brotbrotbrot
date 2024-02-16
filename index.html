@@ -8,24 +8,36 @@
             padding: 0;
         }
         body {
+            color: green;
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
             background-size: 100% 100%;
         }
         #id, #canvas, #bg {
-            position: absolute;
+            /*position: absolute;*/
+            position: fixed;
             left: 0;
-            top: 30;/*if you change, also change in onmousemove func*/
+            top: 0;/*if you change, also change in onmousemove func*/
+        }
+        #info {
+            z-index: 10;
+            position: absolute;
         }
         </style>
     </head>
     <body>
         <div>
-          <canvas id="bg" width="800" height="800"></canvas>
-          <canvas id="canvas" width="800" height="800"></canvas>
+          <canvas id="bg" width="1000" height="800"></canvas>
+          <canvas id="canvas" width="1000" height="800"></canvas>
         </div>
+    <div id="info">
         Instructions: r key resets. f key zooms in. d key zooms out. left click sticks/unsticks trace. middle click to pan.
+    <br>
+    Switch to:
+    <a href="javascript:window.setbrot()">Mandelbrot</a>
+    <a href="javascript:window.setnewt()">Newton z^3-1</a>
+    </div>
     </body>
 </html>
 
